@@ -1,0 +1,1 @@
+ALTER TABLE "comments" ADD COLUMN "curve_id" varchar(44) NOT NULL;

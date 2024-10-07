@@ -24,3 +24,21 @@ dist-ssr
 *.sw?
 
 .npmrc
+
+# Logs
+logs
+*.log
+
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+
+# Environment variables
+.env
+
+# Ignore everything in migrations folder
+# Except for SQL files
+/migrations/*
+!/migrations/**/*.sql

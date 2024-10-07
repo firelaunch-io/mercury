@@ -1,0 +1,22 @@
+# Use Node.js LTS version as the base image
+FROM node:20-bullseye
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy package.json and pnpm-lock.yaml
+COPY apps/backend/package.json .
+COPY pnpm-lock.yaml .
+COPY .npmrc .
+
+# Install backend dependencies
+RUN pnpm install
+
+# Expose the backend port
+EXPOSE 3000
+
+# Run migrations and start the backend server with live reloading
+CMD ["sh", "-c", "pnpm drizzle:migrate && pnpm dev"]

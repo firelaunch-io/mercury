@@ -1,0 +1,22 @@
+# Use Node.js LTS version as the base image
+FROM node:20-bullseye
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy package.json and pnpm-lock.yaml
+COPY apps/frontend/package.json .
+COPY pnpm-lock.yaml .
+COPY .npmrc .
+
+# Install frontend dependencies
+RUN pnpm install
+
+# Expose the port used by the development server (Vite default is 5173)
+EXPOSE 5173
+
+# Start the frontend development server
+CMD ["pnpm", "dev"]
