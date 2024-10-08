@@ -36,6 +36,12 @@ const gradients: Record<
     mountain2: ['#1E1E3F', '#2D2D5F'],
     mountain3: ['#0F0F2F', '#1E1E4F'],
   },
+  blackAndWhite: {
+    sky: ['#FFFFFF', '#FFFFFF'],
+    mountain1: ['#1A1A1A', '#2A2A2A'],
+    mountain2: ['#2A2A2A', '#3A3A3A'],
+    mountain3: ['#3A3A3A', '#4A4A4A'],
+  },
 };
 
 const generateStars = (count: number) =>
@@ -84,6 +90,8 @@ const SvgCelestialBody: FC<{ variant: BackgroundVariant }> = ({ variant }) => {
       return <circle cx="85%" cy="15%" r="80" fill="#FF2400" />;
     case 'twilight':
       return <circle cx="85%" cy="15%" r="70" fill="#E6E6FA" opacity="0.7" />;
+    case 'blackAndWhite':
+      return <circle cx="85%" cy="15%" r="60" fill="#000000" />;
   }
 };
 

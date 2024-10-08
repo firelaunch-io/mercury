@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 RUN npm install -g pnpm
 
 # Copy package.json and pnpm-lock.yaml
-COPY apps/frontend/package.json .
+COPY apps/dapp/package.json .
 COPY pnpm-lock.yaml .
 COPY .npmrc .
 

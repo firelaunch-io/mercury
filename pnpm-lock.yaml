@@ -81,6 +81,9 @@ importers:
       '@coral-xyz/anchor':
         specifier: ^0.30.1
         version: 0.30.1
+      '@fontsource/poppins':
+        specifier: ^5.1.0
+        version: 5.1.0
       '@headlessui/react':
         specifier: ^2.1.5
         version: 2.1.8(react-dom@18.3.1)(react@18.3.1)
@@ -2880,6 +2883,10 @@ packages:
 
   /@floating-ui/utils@0.2.8:
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
+    dev: false
+
+  /@fontsource/poppins@5.1.0:
+    resolution: {integrity: sha512-tpLXlnNi2fwQjiipvuj4uNFHCdoLA8izRsKdoexZuEzjx0r/g1aKLf4ta6lFgF7L+/+AFdmaXFlUwwvmDzYH+g==}
     dev: false
 
   /@fractalwagmi/popup-connection@1.1.1(react-dom@18.3.1)(react@18.3.1):

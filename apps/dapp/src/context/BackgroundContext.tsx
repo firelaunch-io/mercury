@@ -1,20 +1,20 @@
 import React, { createContext, ReactNode } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
-type BackgroundVariant = 'dark' | 'light' | 'dusk' | 'twilight';
+import { BackgroundVariant } from '@/types';
 
-interface BackgroundContextType {
+type BackgroundContextType = {
   variant: BackgroundVariant;
   setVariant: (variant: BackgroundVariant) => void;
-}
+};
 
 export const BackgroundContext = createContext<
   BackgroundContextType | undefined
 >(undefined);
 
-interface BackgroundProviderProps {
+type BackgroundProviderProps = {
   children: ReactNode;
-}
+};
 
 export const BackgroundProvider: React.FC<BackgroundProviderProps> = ({
   children,

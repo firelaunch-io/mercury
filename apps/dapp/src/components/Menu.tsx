@@ -10,7 +10,7 @@ import { useState, useEffect, useRef } from 'react';
 import React, { FC, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 
-import { RpcSelector } from '@/components';
+import { RpcSelector, Logo as MercuryLogo } from '@/components';
 import { useBackground, useAuth } from '@/hooks';
 
 // Constants
@@ -21,6 +21,11 @@ const backgroundVariants = [
   { name: 'Light', value: 'light', colors: ['#87CEEB', '#E0F6FF'] },
   { name: 'Dusk', value: 'dusk', colors: ['#FF5050', '#FF5500'] },
   { name: 'Twilight', value: 'twilight', colors: ['#1C1C3C', '#2E2E5C'] },
+  {
+    name: 'Black and White',
+    value: 'blackAndWhite',
+    colors: ['#FFFFFF', '#FFFFFF'],
+  },
 ] as const;
 
 // Components
@@ -33,15 +38,10 @@ const Logo: FC<LogoProps> = ({ className }) => (
     to="/"
     className={`flex items-center ${className} bg-white rounded-full px-4 py-1 transition-colors duration-300 hover:bg-black group`}
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="w-8 h-8 text-black mr-2 group-hover:text-white transition-colors duration-300"
-    >
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5c.83.83 2.17.83 3 0 .83-.83.83-2.17 0-3-.83-.83-2.17-.83-3 0-.83.83-.83 2.17 0 3z" />
-    </svg>
-    <span className="text-xl font-bold text-black group-hover:text-white transition-colors duration-300">Mercury</span>
+    <MercuryLogo className="w-8 h-8 text-black mr-2 group-hover:text-white transition-colors duration-300" />
+    <span className="text-xl font-bold text-black group-hover:text-white transition-colors duration-300">
+      Mercury
+    </span>
   </Link>
 );
 

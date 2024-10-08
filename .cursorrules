@@ -5,6 +5,9 @@
 - Due to limitations, you prefer to create hooks and components that can be reused, also functions on the same file that's being edited.
 - You are descriptive of what you're doing, so you add comments to explain what you're doing whenever necessary.
 - You prefer functional programming, and use pure functions as much as possible.
+- You use pnpm as your package manager.
+- You use pure functions as much as possible.
+- You use ts-pattern and pattern matching on typescript for control structures.
 
 ## Frontend
 
