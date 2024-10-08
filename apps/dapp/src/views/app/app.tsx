@@ -4,18 +4,20 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ArrowsUpDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/solid';
 import { useQuery } from '@tanstack/react-query';
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { match } from 'ts-pattern';
 
 import { Menu, Background, FormInput, Logo } from '@/components';
 
 type LaunchpadItem = {
   id: number;
   name: string;
-  currentPrice: number;
+  symbol: string;
+  price: number;
   marketCap: number;
   tvl: number;
   isHot: boolean;
@@ -23,28 +25,27 @@ type LaunchpadItem = {
   bondingCurveType: string;
   completionPercentage: number;
   source: string;
-};
-
-type LaunchedToken = {
-  id: number;
-  name: string;
-  currentPrice: number;
-  marketCap: number;
-  tvl: number;
+  creationDate: string;
+  creator: string;
 };
 
 // Mock API functions
 const fetchLaunchpads = async (
   sortBy = 'name',
   sortOrder = 'asc',
-): Promise<LaunchpadItem[]> => {
+  page = 1,
+  pageSize = 25,
+  isHot?: boolean,
+  isNew?: boolean,
+): Promise<{ data: LaunchpadItem[]; total: number }> => {
   // Simulating API call
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const data = [
     {
       id: 1,
       name: 'Launchpad 1',
-      currentPrice: 0.5,
+      symbol: 'LP1',
+      price: 0.5,
       marketCap: 1000000,
       tvl: 500000,
       isHot: true,
@@ -52,11 +53,14 @@ const fetchLaunchpads = async (
       bondingCurveType: 'Linear',
       completionPercentage: 75,
       source: 'Pump.fun',
+      creationDate: '2d ago',
+      creator: 'Creator A',
     },
     {
       id: 2,
       name: 'Launchpad 2',
-      currentPrice: 1.2,
+      symbol: 'LP2',
+      price: 1.2,
       marketCap: 2500000,
       tvl: 1200000,
       isHot: false,
@@ -64,11 +68,14 @@ const fetchLaunchpads = async (
       bondingCurveType: 'Exponential',
       completionPercentage: 30,
       source: 'fomo3d.fun',
+      creationDate: '5h ago',
+      creator: 'Creator B',
     },
     {
       id: 3,
       name: 'Launchpad 3',
-      currentPrice: 0.8,
+      symbol: 'LP3',
+      price: 0.8,
       marketCap: 1500000,
       tvl: 800000,
       isHot: false,
@@ -76,11 +83,40 @@ const fetchLaunchpads = async (
       bondingCurveType: 'Logarithmic',
       completionPercentage: 50,
       source: 'Pump.fun',
+      creationDate: '1w ago',
+      creator: 'Creator C',
     },
+    // Add more mock data here
+    ...Array.from({ length: 97 }, (_, i) => ({
+      id: i + 4,
+      name: `Launchpad ${i + 4}`,
+      symbol: `LP${i + 4}`,
+      price: Math.random() * 10,
+      marketCap: Math.floor(Math.random() * 10000000),
+      tvl: Math.floor(Math.random() * 5000000),
+      isHot: Math.random() > 0.8,
+      isNew: Math.random() > 0.9,
+      bondingCurveType: ['Linear', 'Exponential', 'Logarithmic'][
+        Math.floor(Math.random() * 3)
+      ],
+      completionPercentage: Math.floor(Math.random() * 100),
+      source: ['Pump.fun', 'fomo3d.fun'][Math.floor(Math.random() * 2)],
+      creationDate: `${Math.floor(Math.random() * 30)}d ago`,
+      creator: `Creator ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+    })),
   ];
 
+  // Filter data based on isHot and isNew
+  let filteredData = data;
+  if (isHot !== undefined) {
+    filteredData = filteredData.filter((item) => item.isHot === isHot);
+  }
+  if (isNew !== undefined) {
+    filteredData = filteredData.filter((item) => item.isNew === isNew);
+  }
+
   // Use a type-safe sorting function
-  return data.sort((a: LaunchpadItem, b: LaunchpadItem) => {
+  const sortedData = filteredData.sort((a: LaunchpadItem, b: LaunchpadItem) => {
     const aValue = a[sortBy as keyof LaunchpadItem];
     const bValue = b[sortBy as keyof LaunchpadItem];
 
@@ -88,51 +124,16 @@ const fetchLaunchpads = async (
     if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
+
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  return {
+    data: sortedData.slice(start, end),
+    total: sortedData.length,
+  };
 };
 
-const fetchLaunchedTokens = async (
-  sortBy = 'name',
-  sortOrder = 'asc',
-): Promise<LaunchedToken[]> => {
-  // Simulating API call
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const data = [
-    {
-      id: 1,
-      name: 'Token A',
-      currentPrice: 2.5,
-      marketCap: 5000000,
-      tvl: 2000000,
-    },
-    {
-      id: 2,
-      name: 'Token B',
-      currentPrice: 1.8,
-      marketCap: 3500000,
-      tvl: 1500000,
-    },
-    {
-      id: 3,
-      name: 'Token C',
-      currentPrice: 3.2,
-      marketCap: 6000000,
-      tvl: 2500000,
-    },
-  ];
-  // Use a type-safe sorting function
-  return data.sort((a: LaunchedToken, b: LaunchedToken) => {
-    const aValue = a[sortBy as keyof LaunchedToken];
-    const bValue = b[sortBy as keyof LaunchedToken];
-
-    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-
-type Tab = 'launchpads' | 'launched';
 type TimeFrame = '5m' | '15m' | '30m';
-type Filter = 'all' | 'hot' | 'new';
 
 type FormData = {
   search: string;
@@ -142,7 +143,7 @@ type FormData = {
 const ProgressBar: FC<{ percentage: number }> = ({ percentage }) => (
   <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
     <div
-      className="bg-blue-600 h-1.5 rounded-full"
+      className="bg-blue-500 h-1.5 rounded-full"
       style={{ width: `${percentage}%` }}
     ></div>
   </div>
@@ -189,7 +190,7 @@ const SortableTableHeader: FC<{
 // Skeleton Loader component
 const SkeletonLoader: FC<{ columns: number }> = ({ columns }) => (
   <>
-    {[...Array(5)].map((_, index) => (
+    {[...Array(25)].map((_, index) => (
       <tr key={index} className="animate-pulse">
         {[...Array(columns)].map((_, cellIndex) => (
           <td key={cellIndex} className="p-1">
@@ -201,6 +202,33 @@ const SkeletonLoader: FC<{ columns: number }> = ({ columns }) => (
   </>
 );
 
+// Pagination component
+const Pagination: FC<{
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}> = ({ currentPage, totalPages, onPageChange }) => (
+  <div className="flex justify-center items-center mt-4">
+    <button
+      onClick={() => onPageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+      className="mr-2 px-2 py-1 rounded bg-gray-500 disabled:opacity-50"
+    >
+      <ChevronLeftIcon className="w-4 h-4" />
+    </button>
+    <span>
+      Page {currentPage} of {totalPages}
+    </span>
+    <button
+      onClick={() => onPageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className="ml-2 px-2 py-1 rounded bg-gray-500 disabled:opacity-50"
+    >
+      <ChevronRightIcon className="w-4 h-4" />
+    </button>
+  </div>
+);
+
 // Launchpads component
 const Launchpads: FC = () => {
   const {
@@ -209,36 +237,45 @@ const Launchpads: FC = () => {
     formState: { errors },
   } = useForm<FormData>();
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('5m');
-  const [filter, setFilter] = useState<Filter>('all');
+  const [isHot, setIsHot] = useState<boolean | undefined>(undefined);
+  const [isNew, setIsNew] = useState<boolean | undefined>(undefined);
   const [sort, setSort] = useState<{ key: string; order: 'asc' | 'desc' }>({
     key: 'name',
     order: 'asc',
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 25;
 
   const {
-    data: launchpads,
+    data: launchpadsData,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['launchpads', sort.key, sort.order],
-    queryFn: () => fetchLaunchpads(sort.key, sort.order),
+    queryKey: [
+      'launchpads',
+      sort.key,
+      sort.order,
+      currentPage,
+      pageSize,
+      isHot,
+      isNew,
+    ],
+    queryFn: () =>
+      fetchLaunchpads(
+        sort.key,
+        sort.order,
+        currentPage,
+        pageSize,
+        isHot,
+        isNew,
+      ),
   });
 
   const onSubmit = (data: FormData) => {
     console.log(data);
     // Implement search functionality for launchpads here
   };
-
-  const filteredLaunchpads = useMemo(
-    () =>
-      launchpads?.filter((launchpad) => {
-        if (filter === 'hot') return launchpad.isHot;
-        if (filter === 'new') return launchpad.isNew;
-        return true;
-      }) || [],
-    [launchpads, filter],
-  );
 
   const handleRowClick = (id: number) => {
     console.log(`Clicked on launchpad with id: ${id}`);
@@ -250,10 +287,30 @@ const Launchpads: FC = () => {
       key,
       order: prevSort.key === key && prevSort.order === 'asc' ? 'desc' : 'asc',
     }));
+    setCurrentPage(1);
+    refetch();
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    refetch();
+  };
+
+  const toggleHot = () => {
+    setIsHot((prev) => (prev === undefined ? true : prev ? undefined : true));
+    setCurrentPage(1);
+    refetch();
+  };
+
+  const toggleNew = () => {
+    setIsNew((prev) => (prev === undefined ? true : prev ? undefined : true));
+    setCurrentPage(1);
     refetch();
   };
 
   if (error) return <div>An error occurred: {error.message}</div>;
+
+  const totalPages = Math.ceil((launchpadsData?.total || 0) / pageSize);
 
   return (
     <div>
@@ -270,20 +327,14 @@ const Launchpads: FC = () => {
       <div className="flex justify-between mb-4">
         <div>
           <button
-            className={`mr-2 px-2 py-1 rounded text-sm ${filter === 'all' ? 'bg-blue-500' : 'bg-gray-500'}`}
-            onClick={() => setFilter('all')}
-          >
-            All
-          </button>
-          <button
-            className={`mr-2 px-2 py-1 rounded text-sm ${filter === 'hot' ? 'bg-red-500' : 'bg-gray-500'}`}
-            onClick={() => setFilter('hot')}
+            className={`mr-2 px-2 py-1 rounded text-sm ${isHot === true ? 'bg-red-500' : 'bg-gray-500'}`}
+            onClick={toggleHot}
           >
             Hot <FireIcon className="inline-block w-3 h-3 ml-1" />
           </button>
           <button
-            className={`px-2 py-1 rounded text-sm ${filter === 'new' ? 'bg-yellow-500' : 'bg-gray-500'}`}
-            onClick={() => setFilter('new')}
+            className={`px-2 py-1 rounded text-sm ${isNew === true ? 'bg-yellow-500' : 'bg-gray-500'}`}
+            onClick={toggleNew}
           >
             New <SparklesIcon className="inline-block w-3 h-3 ml-1" />
           </button>
@@ -322,18 +373,25 @@ const Launchpads: FC = () => {
                 Name
               </SortableTableHeader>
               <SortableTableHeader
-                sortKey="currentPrice"
+                sortKey="symbol"
                 currentSort={sort}
                 onSort={handleSort}
               >
-                Current Price
+                Symbol
+              </SortableTableHeader>
+              <SortableTableHeader
+                sortKey="price"
+                currentSort={sort}
+                onSort={handleSort}
+              >
+                Price
               </SortableTableHeader>
               <SortableTableHeader
                 sortKey="marketCap"
                 currentSort={sort}
                 onSort={handleSort}
               >
-                Market Cap
+                M.Cap
               </SortableTableHeader>
               <SortableTableHeader
                 sortKey="tvl"
@@ -347,7 +405,7 @@ const Launchpads: FC = () => {
                 currentSort={sort}
                 onSort={handleSort}
               >
-                Bonding Curve
+                Curve
               </SortableTableHeader>
               <SortableTableHeader
                 sortKey="completionPercentage"
@@ -363,13 +421,27 @@ const Launchpads: FC = () => {
               >
                 Source
               </SortableTableHeader>
+              <SortableTableHeader
+                sortKey="creationDate"
+                currentSort={sort}
+                onSort={handleSort}
+              >
+                Created
+              </SortableTableHeader>
+              <SortableTableHeader
+                sortKey="creator"
+                currentSort={sort}
+                onSort={handleSort}
+              >
+                Creator
+              </SortableTableHeader>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <SkeletonLoader columns={8} />
+              <SkeletonLoader columns={11} />
             ) : (
-              filteredLaunchpads.map((item) => (
+              launchpadsData?.data.map((item) => (
                 <ClickableTableRow
                   key={item.id}
                   onClick={() => handleRowClick(item.id)}
@@ -386,147 +458,38 @@ const Launchpads: FC = () => {
                     <Logo className="w-4 h-4 mr-1" />
                     {item.name}
                   </td>
-                  <td className="p-1">${item.currentPrice.toFixed(2)}</td>
-                  <td className="p-1">${item.marketCap.toLocaleString()}</td>
-                  <td className="p-1">${item.tvl.toLocaleString()}</td>
+                  <td className="p-1">{item.symbol}</td>
+                  <td className="p-1 text-right">${item.price.toFixed(2)}</td>
+                  <td className="p-1 text-right">
+                    ${item.marketCap.toLocaleString()}
+                  </td>
+                  <td className="p-1 text-right">
+                    ${item.tvl.toLocaleString()}
+                  </td>
                   <td className="p-1">{item.bondingCurveType}</td>
                   <td className="p-1 w-24">
                     <ProgressBar percentage={item.completionPercentage} />
                   </td>
                   <td className="p-1">{item.source}</td>
+                  <td className="p-1">{item.creationDate}</td>
+                  <td className="p-1">{item.creator}</td>
                 </ClickableTableRow>
               ))
             )}
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };
-
-// Launched Tokens component
-const LaunchedTokens: FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
-
-  const [sort, setSort] = useState<{ key: string; order: 'asc' | 'desc' }>({
-    key: 'name',
-    order: 'asc',
-  });
-
-  const {
-    data: launchedTokens,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['launchedTokens', sort.key, sort.order],
-    queryFn: () => fetchLaunchedTokens(sort.key, sort.order),
-  });
-
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-    // Implement search functionality for launched tokens here
-  };
-
-  const handleRowClick = (id: number) => {
-    console.log(`Clicked on launched token with id: ${id}`);
-    // Implement row click functionality here
-  };
-
-  const handleSort = (key: string) => {
-    setSort((prevSort) => ({
-      key,
-      order: prevSort.key === key && prevSort.order === 'asc' ? 'desc' : 'asc',
-    }));
-    refetch();
-  };
-
-  if (error) return <div>An error occurred: {error.message}</div>;
-
-  return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
-        <FormInput
-          label="Search Launched Tokens"
-          id="search"
-          type="text"
-          register={register}
-          errors={errors}
-        />
-      </form>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <SortableTableHeader
-                sortKey="name"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Name
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="currentPrice"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Current Price
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="marketCap"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Market Cap
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="tvl"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                TVL
-              </SortableTableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <SkeletonLoader columns={4} />
-            ) : (
-              launchedTokens?.map((item) => (
-                <ClickableTableRow
-                  key={item.id}
-                  onClick={() => handleRowClick(item.id)}
-                >
-                  <td className="p-1 flex items-center">
-                    <Logo className="w-4 h-4 mr-1" />
-                    {item.name}
-                  </td>
-                  <td className="p-1">${item.currentPrice.toFixed(2)}</td>
-                  <td className="p-1">${item.marketCap.toLocaleString()}</td>
-                  <td className="p-1">${item.tvl.toLocaleString()}</td>
-                </ClickableTableRow>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-const TabContent: FC<{ activeTab: Tab }> = ({ activeTab }) =>
-  match(activeTab)
-    .with('launchpads', () => <Launchpads />)
-    .with('launched', () => <LaunchedTokens />)
-    .exhaustive();
 
 export const App = () => {
-  const [activeTab, setActiveTab] = useState<Tab>('launchpads');
-
+  console.log('Hi');
   return (
     <main className="relative flex flex-col min-h-screen min-w-screen text-white">
       <div className="absolute w-full h-full">
@@ -536,31 +499,14 @@ export const App = () => {
         <Menu />
       </div>
       <main className="mt-24 z-10 px-2 md:px-4 pb-2 md:pb-4 pt-4 rounded-lg black-blur-background mx-2 md:mx-4">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Mercury</h1>
-        <div className="flex ">
-          <button
-            className={`mr-4 px-3 py-1 rounded-t-lg text-sm ${
-              activeTab === 'launchpads'
-                ? 'bg-black bg-opacity-20 backdrop-blur-md'
-                : 'bg-white bg-opacity-50 hover:bg-opacity-70'
-            }`}
-            onClick={() => setActiveTab('launchpads')}
-          >
-            Launchpads
-          </button>
-          <button
-            className={`px-3 py-1 rounded-t-lg text-sm ${
-              activeTab === 'launched'
-                ? 'bg-black bg-opacity-20 backdrop-blur-md'
-                : 'bg-white bg-opacity-50 hover:bg-opacity-70'
-            }`}
-            onClick={() => setActiveTab('launched')}
-          >
-            Launched Tokens
-          </button>
-        </div>
-        <div className="backdrop-blur-md p-3 rounded-b-lg rounded-tr-lg">
-          <TabContent activeTab={activeTab} />
+        <h1 className="text-3xl font-bold mb-4">Mercury Aggregator</h1>
+        <p className="text-sm mb-4">
+          Mercury is a platform for finding the best launchpads and tokens to
+          invest in, by aggregating data from your favorite protocols like
+          pump.fun and fomo3d.fun
+        </p>
+        <div className="backdrop-blur-3xl p-3 rounded-lg">
+          <Launchpads />
         </div>
       </main>
     </main>
