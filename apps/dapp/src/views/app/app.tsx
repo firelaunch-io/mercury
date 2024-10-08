@@ -6,10 +6,13 @@ import {
   ArrowsUpDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ListBulletIcon as ViewListIcon,
+  RectangleGroupIcon as ViewGridIcon,
 } from '@heroicons/react/24/solid';
 import { useQuery } from '@tanstack/react-query';
 import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 import { Menu, Background, FormInput, Logo } from '@/components';
 
@@ -27,6 +30,7 @@ type LaunchpadItem = {
   source: string;
   creationDate: string;
   creator: string;
+  curveAddress: string; // Add this field
 };
 
 // Mock API functions
@@ -55,6 +59,7 @@ const fetchLaunchpads = async (
       source: 'Pump.fun',
       creationDate: '2d ago',
       creator: 'Creator A',
+      curveAddress: '0x1234567890123456789012345678901234567890', // Add mock curve address
     },
     {
       id: 2,
@@ -70,6 +75,7 @@ const fetchLaunchpads = async (
       source: 'fomo3d.fun',
       creationDate: '5h ago',
       creator: 'Creator B',
+      curveAddress: '0x2345678901234567890123456789012345678901', // Add mock curve address
     },
     {
       id: 3,
@@ -85,6 +91,7 @@ const fetchLaunchpads = async (
       source: 'Pump.fun',
       creationDate: '1w ago',
       creator: 'Creator C',
+      curveAddress: '0x3456789012345678901234567890123456789012', // Add mock curve address
     },
     // Add more mock data here
     ...Array.from({ length: 97 }, (_, i) => ({
@@ -103,6 +110,7 @@ const fetchLaunchpads = async (
       source: ['Pump.fun', 'fomo3d.fun'][Math.floor(Math.random() * 2)],
       creationDate: `${Math.floor(Math.random() * 30)}d ago`,
       creator: `Creator ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+      curveAddress: `0x${Math.random().toString(16).substr(2, 40)}`, // Add mock curve address
     })),
   ];
 
@@ -229,8 +237,44 @@ const Pagination: FC<{
   </div>
 );
 
+// LaunchpadCard component
+const LaunchpadCard: FC<{ item: LaunchpadItem; onClick: () => void }> = ({
+  item,
+  onClick,
+}) => (
+  <div
+    onClick={onClick}
+    className="bg-gray-800 p-4 rounded-lg shadow-lg cursor-pointer transition-all duration-300 hover:shadow-[0_0_10px_#9E9E9EFF]"
+  >
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="text-lg font-semibold">{item.name}</h3>
+      <div>
+        {item.isHot && (
+          <FireIcon className="w-5 h-5 text-red-500 inline-block mr-1" />
+        )}
+        {item.isNew && (
+          <SparklesIcon className="w-5 h-5 text-yellow-500 inline-block" />
+        )}
+      </div>
+    </div>
+    <p className="text-sm text-gray-400 mb-2">{item.symbol}</p>
+    <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+      <div>Price: ${item.price.toFixed(2)}</div>
+      <div>M.Cap: ${item.marketCap.toLocaleString()}</div>
+      <div>TVL: ${item.tvl.toLocaleString()}</div>
+      <div>Curve: {item.bondingCurveType}</div>
+    </div>
+    <ProgressBar percentage={item.completionPercentage} />
+    <div className="mt-2 text-xs text-gray-400">
+      <span>{item.source}</span> • <span>{item.creationDate}</span> •{' '}
+      <span>{item.creator}</span>
+    </div>
+  </div>
+);
+
 // Launchpads component
 const Launchpads: FC = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -245,6 +289,7 @@ const Launchpads: FC = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const {
     data: launchpadsData,
@@ -277,9 +322,8 @@ const Launchpads: FC = () => {
     // Implement search functionality for launchpads here
   };
 
-  const handleRowClick = (id: number) => {
-    console.log(`Clicked on launchpad with id: ${id}`);
-    // Implement row click functionality here
+  const handleRowClick = (curveAddress: string) => {
+    navigate(`/curve/${curveAddress}`);
   };
 
   const handleSort = (key: string) => {
@@ -339,146 +383,192 @@ const Launchpads: FC = () => {
             New <SparklesIcon className="inline-block w-3 h-3 ml-1" />
           </button>
         </div>
-        <div>
-          <button
-            className={`mr-2 px-2 py-1 rounded text-sm ${timeFrame === '5m' ? 'bg-green-500' : 'bg-gray-500'}`}
-            onClick={() => setTimeFrame('5m')}
-          >
-            5m
-          </button>
-          <button
-            className={`mr-2 px-2 py-1 rounded text-sm ${timeFrame === '15m' ? 'bg-green-500' : 'bg-gray-500'}`}
-            onClick={() => setTimeFrame('15m')}
-          >
-            15m
-          </button>
-          <button
-            className={`px-2 py-1 rounded text-sm ${timeFrame === '30m' ? 'bg-green-500' : 'bg-gray-500'}`}
-            onClick={() => setTimeFrame('30m')}
-          >
-            30m
-          </button>
+        <div className="flex items-center">
+          <div className="mr-4">
+            <button
+              className={`mr-2 px-2 py-1 rounded text-sm ${timeFrame === '5m' ? 'bg-green-500' : 'bg-gray-500'}`}
+              onClick={() => setTimeFrame('5m')}
+            >
+              5m
+            </button>
+            <button
+              className={`mr-2 px-2 py-1 rounded text-sm ${timeFrame === '15m' ? 'bg-green-500' : 'bg-gray-500'}`}
+              onClick={() => setTimeFrame('15m')}
+            >
+              15m
+            </button>
+            <button
+              className={`px-2 py-1 rounded text-sm ${timeFrame === '30m' ? 'bg-green-500' : 'bg-gray-500'}`}
+              onClick={() => setTimeFrame('30m')}
+            >
+              30m
+            </button>
+          </div>
+          <div>
+            <button
+              className={`mr-2 p-1 rounded ${viewMode === 'list' ? 'bg-blue-500' : 'bg-gray-500'}`}
+              onClick={() => setViewMode('list')}
+            >
+              <ViewListIcon className="w-5 h-5" />
+            </button>
+            <button
+              className={`p-1 rounded ${viewMode === 'grid' ? 'bg-blue-500' : 'bg-gray-500'}`}
+              onClick={() => setViewMode('grid')}
+            >
+              <ViewGridIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <th className="p-1 w-6"></th>
-              <SortableTableHeader
-                sortKey="name"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Name
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="symbol"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Symbol
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="price"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Price
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="marketCap"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                M.Cap
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="tvl"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                TVL
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="bondingCurveType"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Curve
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="completionPercentage"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Completion
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="source"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Source
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="creationDate"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Created
-              </SortableTableHeader>
-              <SortableTableHeader
-                sortKey="creator"
-                currentSort={sort}
-                onSort={handleSort}
-              >
-                Creator
-              </SortableTableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <SkeletonLoader columns={11} />
-            ) : (
-              launchpadsData?.data.map((item) => (
-                <ClickableTableRow
-                  key={item.id}
-                  onClick={() => handleRowClick(item.id)}
+      {viewMode === 'list' ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left">
+                <th className="p-1 w-6"></th>
+                <SortableTableHeader
+                  sortKey="name"
+                  currentSort={sort}
+                  onSort={handleSort}
                 >
-                  <td className="p-1">
-                    {item.isHot && (
-                      <FireIcon className="w-3 h-3 text-red-500" />
-                    )}
-                    {item.isNew && (
-                      <SparklesIcon className="w-3 h-3 text-yellow-500" />
-                    )}
-                  </td>
-                  <td className="p-1 flex items-center">
-                    <Logo className="w-4 h-4 mr-1" />
-                    {item.name}
-                  </td>
-                  <td className="p-1">{item.symbol}</td>
-                  <td className="p-1 text-right">${item.price.toFixed(2)}</td>
-                  <td className="p-1 text-right">
-                    ${item.marketCap.toLocaleString()}
-                  </td>
-                  <td className="p-1 text-right">
-                    ${item.tvl.toLocaleString()}
-                  </td>
-                  <td className="p-1">{item.bondingCurveType}</td>
-                  <td className="p-1 w-24">
-                    <ProgressBar percentage={item.completionPercentage} />
-                  </td>
-                  <td className="p-1">{item.source}</td>
-                  <td className="p-1">{item.creationDate}</td>
-                  <td className="p-1">{item.creator}</td>
-                </ClickableTableRow>
+                  Name
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="symbol"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Symbol
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="price"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Price
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="marketCap"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  M.Cap
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="tvl"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  TVL
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="bondingCurveType"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Curve
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="completionPercentage"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Completion
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="source"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Source
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="creationDate"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Created
+                </SortableTableHeader>
+                <SortableTableHeader
+                  sortKey="creator"
+                  currentSort={sort}
+                  onSort={handleSort}
+                >
+                  Creator
+                </SortableTableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <SkeletonLoader columns={11} />
+              ) : (
+                launchpadsData?.data.map((item) => (
+                  <ClickableTableRow
+                    key={item.id}
+                    onClick={() => handleRowClick(item.curveAddress)}
+                  >
+                    <td className="p-1">
+                      {item.isHot && (
+                        <FireIcon className="w-3 h-3 text-red-500" />
+                      )}
+                      {item.isNew && (
+                        <SparklesIcon className="w-3 h-3 text-yellow-500" />
+                      )}
+                    </td>
+                    <td className="p-1 flex items-center">
+                      <Logo className="w-4 h-4 mr-1" />
+                      {item.name}
+                    </td>
+                    <td className="p-1">{item.symbol}</td>
+                    <td className="p-1 text-right">${item.price.toFixed(2)}</td>
+                    <td className="p-1 text-right">
+                      ${item.marketCap.toLocaleString()}
+                    </td>
+                    <td className="p-1 text-right">
+                      ${item.tvl.toLocaleString()}
+                    </td>
+                    <td className="p-1">{item.bondingCurveType}</td>
+                    <td className="p-1 w-24">
+                      <ProgressBar percentage={item.completionPercentage} />
+                    </td>
+                    <td className="p-1">{item.source}</td>
+                    <td className="p-1">{item.creationDate}</td>
+                    <td className="p-1">{item.creator}</td>
+                  </ClickableTableRow>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {isLoading
+            ? [...Array(25)].map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-800 p-4 rounded-lg shadow-lg animate-pulse"
+                >
+                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                    <div className="h-3 bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="h-2 bg-gray-700 rounded w-full mt-4"></div>
+                  <div className="h-2 bg-gray-700 rounded w-3/4 mt-2"></div>
+                </div>
               ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            : launchpadsData?.data.map((item) => (
+                <LaunchpadCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => handleRowClick(item.curveAddress)}
+                />
+              ))}
+        </div>
+      )}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
