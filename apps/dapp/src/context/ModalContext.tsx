@@ -10,7 +10,7 @@ export const ModalContext = createContext<ModalContextType | undefined>(
   undefined,
 );
 
-interface ModalProviderProps {
+type ModalProviderProps = {
   children: ReactNode;
 }
 

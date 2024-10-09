@@ -9,8 +9,7 @@ type CoinGeckoPriceResponse = {
 export const useCoinGeckoPriceQuery = (
   coinId: string,
   vsCurrencies: string[],
-) => {
-  return useQuery<CoinGeckoPriceResponse, Error>({
+) => useQuery<CoinGeckoPriceResponse, Error>({
     queryKey: ['coinGeckoPrice', coinId, vsCurrencies],
     queryFn: async () => {
       const response = await fetch(
@@ -21,4 +20,3 @@ export const useCoinGeckoPriceQuery = (
       return response.json();
     },
   });
-};

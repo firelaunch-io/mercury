@@ -37,8 +37,7 @@ export const BondingCurveChart: React.FC<BondingCurveChartProps> = ({
   chartData,
   className,
   maxSupply,
-}) => {
-  return (
+}) => (
     <div className={cx('flex-1', className)}>
       <Line
         data={chartData}
@@ -64,4 +63,3 @@ export const BondingCurveChart: React.FC<BondingCurveChartProps> = ({
       />
     </div>
   );
-};

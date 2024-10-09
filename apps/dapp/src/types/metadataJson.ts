@@ -49,18 +49,14 @@ export type MetadataJson = z.infer<typeof MetadataJsonSchema>;
  * @param attributes - The array of attributes to validate.
  * @returns The validated array of attributes.
  */
-export const buildAttributes = (attributes: Attribute[]): Attribute[] => {
-  return z.array(AttributeSchema).parse(attributes);
-};
+export const buildAttributes = (attributes: Attribute[]): Attribute[] => z.array(AttributeSchema).parse(attributes);
 
 /**
  * Builds and validates the properties object.
  * @param properties - The properties object to validate.
  * @returns The validated properties object.
  */
-export const buildProperties = (properties: Properties): Properties => {
-  return PropertiesSchema.parse(properties);
-};
+export const buildProperties = (properties: Properties): Properties => PropertiesSchema.parse(properties);
 
 /**
  * Validates and constructs a MetadataJson object.
@@ -83,8 +79,7 @@ export const validateMetadataJson = (
   properties: Properties,
   animation_url?: string,
   external_url?: string,
-): MetadataJson => {
-  return MetadataJsonSchema.parse({
+): MetadataJson => MetadataJsonSchema.parse({
     name,
     description,
     symbol,
@@ -94,4 +89,3 @@ export const validateMetadataJson = (
     attributes,
     properties,
   });
-};

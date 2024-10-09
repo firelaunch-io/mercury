@@ -8,7 +8,7 @@ type RpcContextType = {
 
 export const RpcContext = createContext<RpcContextType | undefined>(undefined);
 
-interface RpcProviderProps {
+type RpcProviderProps = {
   children: ReactNode;
 }
 
