@@ -1,14 +1,17 @@
-import nacl from "tweetnacl";
 import { PublicKey } from "@solana/web3.js";
-import { Response, RequestHandler } from "express";
 import b58 from "bs58";
-import { TextDecoder } from "util";
 import { isAfter, fromUnixTime } from "date-fns";
-import { z } from "zod";
+import { Response, RequestHandler } from "express";
 import { match, P } from "ts-pattern";
+import nacl from "tweetnacl";
+import { z } from "zod";
+
+import { TextDecoder } from "util";
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
     interface Locals {
       pubKey: string;
     }
@@ -70,13 +73,11 @@ const parseAuthToken = (authToken: string): AuthToken => {
   return result.data;
 };
 
-const verifySignature = (msg: string, sig: string, pk: string): boolean => {
-  return nacl.sign.detached.verify(
+const verifySignature = (msg: string, sig: string, pk: string): boolean => nacl.sign.detached.verify(
     b58.decode(msg),
     b58.decode(sig),
     new PublicKey(pk).toBytes()
   );
-};
 
 const MessageSchema = z.object({
   action: z.string(),
@@ -90,9 +91,7 @@ const decodeMessage = (msg: string): Message => {
   return MessageSchema.parse(decoded);
 };
 
-const isSignatureExpired = (exp: number): boolean => {
-  return isAfter(new Date(), fromUnixTime(exp));
-};
+const isSignatureExpired = (exp: number): boolean => isAfter(new Date(), fromUnixTime(exp));
 
 const validateAction = (
   messageAction: string,
@@ -158,4 +157,4 @@ export const solanaAuth: SolanaAuthHandlerCreator =
     }
   };
 
-export const authorizedPk = (res: Response) => res.locals.pubKey as string;
+export const authorizedPk = (res: Response): string => res.locals.pubKey as string;

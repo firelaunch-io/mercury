@@ -1,10 +1,14 @@
+import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
-import { users } from "./users";
-import { AnyPgColumn } from "drizzle-orm/pg-core";
+
 import { refineSolanaPubkey, SOLANA_PUBKEY_MAX_LENGTH } from "../core";
+
+import { users } from "./users";
+
+
 
 export const comments = pgTable("comments", {
   id: varchar("id", { length: 36 })

@@ -1,4 +1,7 @@
+import { eq, and } from "drizzle-orm";
 import express from "express";
+
+import { db } from "../core";
 import { solanaAuth, authorizedPk } from "../middleware/solanaAuth";
 import {
   comments,
@@ -8,8 +11,6 @@ import {
   insertCommentLikeSchema,
   updateCommentSchema,
 } from "../schema/comments";
-import { db } from "../core";
-import { eq, and } from "drizzle-orm";
 
 const router = express.Router();
 

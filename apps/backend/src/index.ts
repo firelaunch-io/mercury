@@ -1,7 +1,7 @@
+import cors from "cors";
 import express from "express";
 import "dotenv/config";
 import expressJSDocSwagger from "express-jsdoc-swagger";
-import cors from "cors";
 
 import { PORT } from "./core";
 import { userRouter, commentRouter } from "./routes";
@@ -42,11 +42,12 @@ const options = {
   apiDocsPath: "/api-docs",
   notRequiredAsNullable: false,
   swaggerUiOptions: {},
-} ;
+};
 
 // Initialize express-jsdoc-swagger
 expressJSDocSwagger(app)(options);
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Backend server is running at http://localhost:${PORT}`);
 });

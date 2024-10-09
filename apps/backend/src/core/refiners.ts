@@ -1,10 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
 
-export const refineSolanaPubkey = (id: string) => {
+export const refineSolanaPubkey = (id: string): boolean => {
   try {
     new PublicKey(id);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

@@ -1,7 +1,8 @@
+import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
+
 import { refineSolanaPubkey, SOLANA_PUBKEY_MAX_LENGTH } from "../core";
 
 export const users = pgTable("users", {
@@ -35,12 +36,12 @@ export const followers = pgTable(
       .default(sql`now()`)
       .notNull(),
   },
-  (table) => {
+  (table) => 
     // Add a unique constraint to prevent duplicate follower-followed pairs
-    return {
+     ({
       uniqueFollowerFollowed: sql`CREATE UNIQUE INDEX "followers_follower_id_followed_id_unique_idx" ON ${table} ("follower_id", "followed_id")`,
-    };
-  }
+    })
+  
 );
 
 export const insertUserSchema = createInsertSchema(users, {

@@ -1,5 +1,6 @@
-import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER } from "./constants";
 
 export const pool = new Pool({
@@ -14,6 +15,7 @@ export const db = drizzle(pool);
 
 process.on("SIGINT", () => {
   pool.end();
+  // eslint-disable-next-line no-console
   console.log("Database connection closed.");
   process.exit(0);
 });

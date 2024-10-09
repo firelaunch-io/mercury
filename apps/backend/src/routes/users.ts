@@ -1,4 +1,7 @@
+import { eq, and } from "drizzle-orm";
 import express from "express";
+
+import { db } from "../core"; // Assuming you have a db connection setup
 import { solanaAuth, authorizedPk } from "../middleware/solanaAuth";
 import {
   users,
@@ -8,8 +11,6 @@ import {
   insertFollowerSchema,
   updateUserSchema,
 } from "../schema/users";
-import { db } from "../core"; // Assuming you have a db connection setup
-import { eq, and } from "drizzle-orm";
 
 const router = express.Router();
 
