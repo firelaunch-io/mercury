@@ -4,12 +4,17 @@
     "apps/*",
     "packages/*"
   ],
+  "packageManager": "pnpm@9.12.1",
   "scripts": {
     "docker:up": "zx scripts/up.mjs",
     "docker:down": "zx scripts/down.mjs",
-    "copy-idl": "zx scripts/copy-idl.mjs"
+    "copy-idl": "zx scripts/copy-idl.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
   },
   "devDependencies": {
+    "turbo": "^2.1.3",
     "zx": "^8.1.8"
   }
 }

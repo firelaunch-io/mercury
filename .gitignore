@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 .npmrc
+
+# Rust
+target/
+Cargo.lock
+
+# Turbo
+.turbo
