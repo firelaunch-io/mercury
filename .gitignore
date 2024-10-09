@@ -26,8 +26,8 @@ dist-ssr
 .npmrc
 
 # Rust
-target/
-Cargo.lock
+**/target/
+**/Cargo.lock
 
 # Turbo
 .turbo

@@ -8,8 +8,6 @@ import { refineSolanaPubkey, SOLANA_PUBKEY_MAX_LENGTH } from "../core";
 
 import { users } from "./users";
 
-
-
 export const comments = pgTable("comments", {
   id: varchar("id", { length: 36 })
     .primaryKey()

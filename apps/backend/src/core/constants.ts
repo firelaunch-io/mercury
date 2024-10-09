@@ -1,4 +1,5 @@
 export const SOLANA_PUBKEY_MAX_LENGTH = 44;
+export const SOLANA_TRANSACTION_ID_MAX_LENGTH = 88;
 
 export const PORT = process.env.PORT || 3000;
 export const DB_HOST = process.env.DB_HOST || "localhost";

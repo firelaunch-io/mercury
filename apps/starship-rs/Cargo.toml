@@ -1,0 +1,16 @@
+[package]
+name = "starship-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "^1.40.0", features = ["full"] }
+# Had to downgrade sea-orm to 0.11.3 because of issues with solana and anchor (zeroize)
+sea-orm = { version = "^0.11.3", features = [
+    "sqlx-postgres",
+    "runtime-tokio-native-tls",
+    "macros",
+] }
+dotenv = "^0.15.0"
+anchor-lang = "^0.30.1"
+solana-sdk = "^2.0.3"

@@ -3,7 +3,8 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "target/**"],
+      "inputs": ["src/**", "Cargo.toml"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

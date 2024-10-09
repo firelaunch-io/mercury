@@ -1,0 +1,1 @@
+pub const PG_CONNECTION_NAME: &str = "PG_CONNECTION_NAME";
