@@ -8,6 +8,8 @@
   "scripts": {
     "docker:up": "zx scripts/up.mjs",
     "docker:down": "zx scripts/down.mjs",
+    "drizzle:generate": "pnpm --filter @firelaunch-io/mercury-dapp-backend drizzle:generate",
+    "drizzle:migrate": "pnpm --filter @firelaunch-io/mercury-dapp-backend drizzle:migrate",
     "copy-idl": "zx scripts/copy-idl.mjs",
     "dev": "turbo run dev",
     "build": "turbo run build",

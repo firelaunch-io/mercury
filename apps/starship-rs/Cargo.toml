@@ -11,6 +11,7 @@ sea-orm = { version = "^0.11.3", features = [
     "runtime-tokio-native-tls",
     "macros",
 ] }
-dotenv = "^0.15.0"
+dotenvy = "^0.15.7"
 anchor-lang = "^0.30.1"
-solana-sdk = "^2.0.3"
+solana-client = "^1.18.25"
+solana-sdk = "^1.18.25"

@@ -1,20 +1,20 @@
 mod consts;
 mod magic;
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use sea_orm::{Database, DbErr};
+use solana_client::rpc_client::RpcClient;
 
 use magic::Env;
+
+anchor_lang::declare_program!(pump_fun);
 
 #[tokio::main]
 async fn main() -> Result<(), DbErr> {
     dotenv().ok();
     let database_url = Env::get_pg_connection_name();
-    println!("Database URL: {}", database_url);
-    let _db = Database::connect(&database_url).await?;
-    println!("Connected to the database successfully!");
-
-    // Your application logic here
-
+    let db = Database::connect(&database_url).await?;
+    let rpc_url = Env::get_solana_rpc_url();
+    let client = RpcClient::new(rpc_url);
     Ok(())
 }
