@@ -2,7 +2,6 @@ FROM rust:1.80-bullseye
 
 WORKDIR /usr/src/app
 
-RUN cargo install cargo-watch
 # Copy the Cargo.toml and Cargo.lock files from the workspace root
 COPY Cargo.toml Cargo.lock ./
 
@@ -12,5 +11,11 @@ COPY apps/starship-rs/.env .
 # Copy the source code
 COPY apps/starship-rs/src ./src
 
-# Set the command to run the application with live reloading
-CMD ["cargo", "watch", "-x", "run"]
+# Build the executable
+RUN cargo build --release
+
+# Set the binary as the entrypoint
+ENTRYPOINT ["./target/release/starship-rs"]
+
+# Default command to show help
+CMD ["--help"]

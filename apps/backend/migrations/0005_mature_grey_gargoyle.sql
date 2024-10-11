@@ -1,0 +1,1 @@
+ALTER TABLE "processed_transactions" ALTER COLUMN "block_time" SET NOT NULL;

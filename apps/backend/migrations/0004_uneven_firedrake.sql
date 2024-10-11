@@ -1,0 +1,1 @@
+ALTER TABLE "processed_transactions" ADD COLUMN "block_time" timestamp;

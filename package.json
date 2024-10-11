@@ -8,12 +8,26 @@
   "scripts": {
     "docker:up": "zx scripts/up.mjs",
     "docker:down": "zx scripts/down.mjs",
+    "docker:migrate": "zx scripts/migrate.mjs",
     "drizzle:generate": "pnpm --filter @firelaunch-io/mercury-dapp-backend drizzle:generate",
     "drizzle:migrate": "pnpm --filter @firelaunch-io/mercury-dapp-backend drizzle:migrate",
+    "generate:seaorm-entities": "zx scripts/generate-seaorm-entities.mjs",
     "copy-idl": "zx scripts/copy-idl.mjs",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint"
+  },
+  "scriptsComments": {
+    "docker:up": "Spins up docker compose",
+    "docker:down": "Docker compose down",
+    "docker:migrate": "Run drizzle:migrate in backend-dev",
+    "drizzle:generate": "Generate Drizzle ORM schemas for backend",
+    "drizzle:migrate": "Run Drizzle ORM migrations for backend locally",
+    "generate:seaorm-entities": "Generate Sea-ORM entities for starship-rs",
+    "copy-idl": "Copy Interface Definition Language files (Currently unused)",
+    "dev": "Start development servers for all workspaces",
+    "build": "Build all workspaces",
+    "lint": "Run linter on all workspaces"
   },
   "devDependencies": {
     "turbo": "^2.1.3",

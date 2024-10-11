@@ -1,17 +1,17 @@
 use std::{error::Error, str::FromStr};
 
 use solana_client::{
-    rpc_client::{GetConfirmedSignaturesForAddress2Config, RpcClient},
-    rpc_response::RpcConfirmedTransactionStatusWithSignature,
+    nonblocking::rpc_client::RpcClient, rpc_client::GetConfirmedSignaturesForAddress2Config, rpc_response::RpcConfirmedTransactionStatusWithSignature
 };
 use solana_sdk::{pubkey::Pubkey, signature::Signature};
 
 pub async fn get_all_signatures_for_address(
     client: &RpcClient,
     address: &Pubkey,
+    start_from_signature: Option<Signature>,
 ) -> Result<Vec<RpcConfirmedTransactionStatusWithSignature>, Box<dyn Error>> {
     let mut all_signatures = Vec::new();
-    let mut last_signature = None;
+    let mut last_signature = start_from_signature;
     const LIMIT: usize = 1000;
 
     loop {
@@ -21,7 +21,9 @@ pub async fn get_all_signatures_for_address(
             until: None,
             limit: Some(LIMIT),
         };
-        let signatures = client.get_signatures_for_address_with_config(address, cfg)?;
+        let signatures = client
+            .get_signatures_for_address_with_config(address, cfg)
+            .await?;
 
         if signatures.is_empty() {
             break;

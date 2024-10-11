@@ -7,6 +7,8 @@ import {
   pgEnum,
   smallint,
   boolean,
+  uuid,
+  bigint,
 } from "drizzle-orm/pg-core";
 
 import {
@@ -34,10 +36,12 @@ export const processedTransactions = pgTable("processed_transactions", {
   externalVersion: varchar("external_version", { length: 10 }).notNull(),
   processStatus: processStatusEnum("process_status").notNull(),
   retries: smallint("retries").notNull().default(0),
+  blockTime: bigint("block_time", { mode: "number" }).notNull(), // Changed to bigint for i64 equivalent
   processedAt: timestamp("processed_at"),
 });
 
 export const ticker = pgTable("tickers", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
   externalId: varchar("external_id", { length: 10 }).notNull(),
   creator: varchar("creator", { length: SOLANA_PUBKEY_MAX_LENGTH }).notNull(),
   featured: boolean("featured").notNull(),
