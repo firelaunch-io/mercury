@@ -36,7 +36,7 @@ pub async fn db_latest_transaction_for_program(
 pub async fn fetch_pump_fun_txs(
     rpc_client: &RpcClient,
     db: &sea_orm::DatabaseConnection,
-) -> Result<usize, Box<dyn Error>> {
+) -> Result<(), Box<dyn Error>> {
     // Get all pump fun transactions
     let sigs = get_all_signatures_for_address(rpc_client, &pump_fun::ID, None).await?;
 
@@ -59,10 +59,15 @@ pub async fn fetch_pump_fun_txs(
         })
         .collect();
 
-    // Insert all transactions in a single operation
-    ProcessedTransactions::insert_many(transactions)
-        .exec(db)
-        .await?;
+    // Define the batch size
+    const BATCH_SIZE: usize = 1000;
 
-    Ok(sigs.len())
+    // Process transactions in batches
+    for chunk in transactions.chunks(BATCH_SIZE) {
+        let batch: Vec<ProcessedTransactionActiveModel> = chunk.to_vec();
+        // Insert the batch of transactions
+        ProcessedTransactions::insert_many(batch).exec(db).await?;
+    }
+
+    Ok(())
 }

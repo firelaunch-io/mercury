@@ -42,8 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match &cli.command {
         Some(Commands::FetchPumpFunTransactions) => {
-            let inserted_count = fetch_pump_fun_txs(&rpc_client, &db).await?;
-            println!("Fetched and inserted {} transactions", inserted_count);
+            fetch_pump_fun_txs(&rpc_client, &db).await?;
         }
         Some(Commands::ProcessPumpFunTransactions) => {
             println!("Processing pump fun transactions...");

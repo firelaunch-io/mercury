@@ -4,8 +4,9 @@ FROM rust:1.80-bullseye
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the entire workspace
-COPY . .
+# Copy only the necessary files
+COPY Cargo.lock Cargo.toml ./
+COPY apps/starship-rs ./apps/starship-rs
 
 # Change to the starship-rs directory
 WORKDIR /usr/src/app/apps/starship-rs
