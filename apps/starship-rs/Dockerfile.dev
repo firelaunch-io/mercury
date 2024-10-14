@@ -1,21 +1,20 @@
+# Use the official Rust image as the base image
 FROM rust:1.80-bullseye
 
+# Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the Cargo.toml and Cargo.lock files from the workspace root
-COPY Cargo.toml Cargo.lock ./
+# Copy the entire workspace
+COPY . .
 
-# Copy the .env file
-COPY apps/starship-rs/.env .
+# Change to the starship-rs directory
+WORKDIR /usr/src/app/apps/starship-rs
 
-# Copy the source code
-COPY apps/starship-rs/src ./src
-
-# Build the executable
+# Build the starship-rs application
 RUN cargo build --release
 
-# Set the binary as the entrypoint
-ENTRYPOINT ["./target/release/starship-rs"]
+# Change back to the main workspace directory
+WORKDIR /usr/src/app
 
-# Default command to show help
-CMD ["--help"]
+# Wait for commands
+CMD ["tail", "-f", "/dev/null"]

@@ -1,7 +1,6 @@
 use sea_orm::ColumnTrait;
 use sea_orm::{EntityTrait, QueryFilter, QueryOrder, Set};
 use solana_client::nonblocking::rpc_client::RpcClient;
-use solana_sdk::msg;
 use std::error::Error;
 
 use crate::{
@@ -19,6 +18,7 @@ use crate::{
 };
 
 // Function to get the latest transaction for a program
+#[allow(dead_code)]
 pub async fn db_latest_transaction_for_program(
     db: &sea_orm::DatabaseConnection,
     program_id: &str,

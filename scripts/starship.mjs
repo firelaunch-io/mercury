@@ -8,8 +8,10 @@ import "zx/globals";
  */
 const runInStarshipContainer = async (args) => {
   try {
-    // Use $.pipe() to stream the output in real-time
-    await $`docker exec starship-rs-dev ${args}`.pipe(process.stdout);
+    await $`docker exec -it starship-rs-dev /usr/src/app/target/release/starship-rs ${args}`
+      .pipe(process.stdout)
+      .pipe(process.stderr)
+      .pipe(process.stdin);
   } catch (error) {
     console.error(`Error executing command: ${error.message}`);
     process.exit(1);
@@ -26,7 +28,4 @@ if (args.length === 0) {
   process.exit(1);
 }
 
-console.log(
-  `Executing command in starship-rs-dev container: ${args.join(" ")}`
-);
 await runInStarshipContainer(args);

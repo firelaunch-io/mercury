@@ -55,9 +55,6 @@ services:
       context: .
       dockerfile: apps/starship-rs/Dockerfile.dev
     container_name: starship-rs-dev
-    volumes:
-      - ./apps/starship-rs:/usr/src/app
-      - /usr/src/app/target
     env_file:
       - apps/starship-rs/.env
     depends_on:
