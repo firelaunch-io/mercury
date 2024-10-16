@@ -5,10 +5,9 @@ mod processor;
 
 use clap::{Parser, Subcommand};
 use dotenvy::dotenv;
-use processor::fetch_pump_fun_txs::fetch_pump_fun_txs;
 use sea_orm::Database;
 use solana_client::nonblocking::rpc_client::RpcClient;
-use std::error::Error;
+use std::{error::Error, os::unix::process};
 
 use magic::{draw_starship, Env};
 
@@ -42,11 +41,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match &cli.command {
         Some(Commands::FetchPumpFunTransactions) => {
-            fetch_pump_fun_txs(&rpc_client, &db).await?;
+            processor::pump_fun::fetch_txs(&rpc_client, &db).await?;
         }
         Some(Commands::ProcessPumpFunTransactions) => {
-            println!("Processing pump fun transactions...");
-            // TODO: Implement processing logic
+            processor::pump_fun::process_txs(&rpc_client, &db).await?;
         }
         Some(Commands::DrawStarship) => {
             draw_starship();

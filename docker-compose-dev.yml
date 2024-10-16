@@ -53,7 +53,7 @@ services:
   starship-rs:
     build:
       context: .
-      dockerfile: apps/starship-rs/Dockerfile.dev
+      dockerfile: apps/starship-rs/Dockerfile-chef.dev
     container_name: starship-rs-dev
     env_file:
       - apps/starship-rs/.env

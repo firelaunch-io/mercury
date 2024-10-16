@@ -14,7 +14,7 @@ if (args.length === 0) {
 
 await (async (args) => {
   try {
-    await $`docker exec -it starship-rs-dev /usr/src/app/target/release/starship-rs ${args}`
+    await $`docker exec -it starship-rs-dev starship-rs ${args}`
       .pipe(process.stdout)
       .pipe(process.stderr)
       .pipe(process.stdin);

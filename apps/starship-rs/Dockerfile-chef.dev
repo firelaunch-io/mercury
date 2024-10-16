@@ -1,0 +1,22 @@
+FROM lukemathwalker/cargo-chef:latest-rust-1.80.0 AS chef
+WORKDIR /app
+
+FROM chef as planner
+COPY Cargo.lock Cargo.toml ./
+COPY apps/starship-rs ./apps/starship-rs
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef as builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+COPY Cargo.lock Cargo.toml ./
+COPY apps/starship-rs ./apps/starship-rs
+RUN cargo build --release --bin starship-rs
+
+FROM debian:bookworm-slim AS runtime
+WORKDIR /app
+RUN apt-get update && apt-get upgrade -y && apt-get install -y libssl-dev
+COPY --from=builder /app/target/release/starship-rs /usr/local/bin
+
+# Wait for commands
+CMD ["tail", "-f", "/dev/null"]

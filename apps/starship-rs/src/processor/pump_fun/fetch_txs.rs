@@ -1,6 +1,8 @@
-use sea_orm::ColumnTrait;
-use sea_orm::{EntityTrait, QueryFilter, QueryOrder, Set};
+use sea_orm::{
+    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set,
+};
 use solana_client::nonblocking::rpc_client::RpcClient;
+use std::collections::HashSet;
 use std::error::Error;
 
 use crate::{
@@ -20,32 +22,51 @@ use crate::{
 // Function to get the latest transaction for a program
 #[allow(dead_code)]
 pub async fn db_latest_transaction_for_program(
-    db: &sea_orm::DatabaseConnection,
+    db: &DatabaseConnection,
     program_id: &str,
 ) -> Result<Option<ProcessedTransactionModel>, Box<dyn Error>> {
+    println!("Fetching latest transaction for program: {}", program_id);
     let latest_transaction = ProcessedTransactions::find()
         .filter(ProcessedTransactionColumn::ProgramId.eq(program_id))
         .order_by_desc(ProcessedTransactionColumn::BlockTime)
         .one(db)
         .await?;
 
+    match &latest_transaction {
+        Some(tx) => println!("Latest transaction found: {}", tx.transaction_id),
+        None => println!("No transactions found for the program"),
+    }
+
     Ok(latest_transaction)
 }
 
 // Function to get and process pump fun transactions
-pub async fn fetch_pump_fun_txs(
+pub async fn fetch_txs(
     rpc_client: &RpcClient,
-    db: &sea_orm::DatabaseConnection,
+    db: &DatabaseConnection,
 ) -> Result<(), Box<dyn Error>> {
+    println!("Starting to fetch pump fun transactions...");
+
     // Get all pump fun transactions
     let sigs = get_all_signatures_for_address(rpc_client, &pump_fun::ID, None).await?;
 
     // Log the number of transactions fetched
     println!("Fetched {} pump fun transactions", sigs.len());
 
-    // Insert all transactions to process on the database so we don't have to query the blockchain next time.
-    let transactions: Vec<ProcessedTransactionActiveModel> = sigs
+    // Get existing transaction IDs from the database
+    let existing_txs: Vec<String> = ProcessedTransactions::find()
+        .select_only()
+        .column(ProcessedTransactionColumn::TransactionId)
+        .into_tuple()
+        .all(db)
+        .await?;
+
+    let existing_tx_set: HashSet<String> = existing_txs.into_iter().collect();
+
+    // Filter out existing transactions
+    let new_transactions: Vec<ProcessedTransactionActiveModel> = sigs
         .iter()
+        .filter(|sig| !existing_tx_set.contains(&sig.signature.to_string()))
         .map(|sig| ProcessedTransactionActiveModel {
             transaction_id: Set(sig.signature.to_string()),
             program_id: Set(pump_fun::ID.to_string()),
@@ -59,15 +80,31 @@ pub async fn fetch_pump_fun_txs(
         })
         .collect();
 
+    println!(
+        "Found {} new transactions to insert",
+        new_transactions.len()
+    );
+
     // Define the batch size
     const BATCH_SIZE: usize = 1000;
 
+    println!("Preparing to insert new transactions into the database...");
+
     // Process transactions in batches
-    for chunk in transactions.chunks(BATCH_SIZE) {
+    let total_batches = (new_transactions.len() + BATCH_SIZE - 1) / BATCH_SIZE;
+    for (i, chunk) in new_transactions.chunks(BATCH_SIZE).enumerate() {
         let batch: Vec<ProcessedTransactionActiveModel> = chunk.to_vec();
+        println!(
+            "Inserting batch {} of {} (size: {})",
+            i + 1,
+            total_batches,
+            batch.len()
+        );
         // Insert the batch of transactions
         ProcessedTransactions::insert_many(batch).exec(db).await?;
+        println!("Batch {} inserted successfully", i + 1);
     }
 
+    println!("All new transactions have been inserted into the database.");
     Ok(())
 }
